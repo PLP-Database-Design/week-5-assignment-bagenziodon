@@ -74,6 +74,26 @@ Create a ```GET``` endpoint that retrieves all patients and displays their:
 - ```first_name```
 - ```last_name```
 - ```date_of_birth```
+<!-- GET Method -->
+// Set view engine
+    app.set('view engine', 'ejs');
+    // Views folder is expected to be named 'views'
+    app.set('views', __dirname + '/views');
+
+    // Define routes
+    app.get('/data', (req, res) => {
+        // Retrieve data from the database
+        const getPatients = 'SELECT patient_id, first_name, last_name, date_of_birth FROM patients';
+        db.query(getPatients, (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Failed to retrieve data');
+            } else {
+                // Display the records to the browser
+                return res.render('data', { results: results });
+            }
+        });
+    });
 
 <br>
 
@@ -83,17 +103,67 @@ Create a ```GET``` endpoint that displays all providers with their:
 - ```last_name```
 - ```provider_specialty```
 
+ // route to get all providers
+    app.get('/providers', (req, res) => {
+        const getProviders = 'SELECT first_name, last_name, provider_specialty FROM providers';
+        db.query(getProviders, (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Failed to retrieve providers data');
+            } else {
+                // Render the providers view with the retrieved results
+                return res.render('providers', { results: results });
+            }
+        });
+    });
+</table>
+
 <br>
 
 ## 3. Filter patients by First Name
 Create a ```GET``` endpoint that retrieves all patients by their first name
 
-<br>
+// route to filter patients by first name
+    app.get('/patients/first_name/:firstName', (req, res) => {
+        const firstName = req.params.firstName; // Get the first name from the URL parameters
+        const getPatientsByFirstName = 'SELECT * FROM patients WHERE first_name = ?'; // Query to get patients by first name
+
+        db.query(getPatientsByFirstName, [firstName], (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Failed to retrieve patients data by first name');
+            } else if (results.length === 0) {
+                return res.status(404).send('No patients found with this first name');
+            } else {
+                // Render the patients view with the retrieved results
+                return res.render('patients', { results: results });
+            }
+        });
+    });
 
 ## 4. Retrieve all providers by their specialty
 Create a ```GET``` endpoint that retrieves all providers by their specialty
+app.get('/providers/provider_specialty/:specialty', (req, res) => {
+        const specialty = req.params.specialty; // Get the specialty from the URL parameters
+        const getProvidersBySpecialty = 'SELECT * FROM providers WHERE provider_specialty = ?'; // Query to get providers by specialty
 
+        db.query(getProvidersBySpecialty, [specialty], (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Failed to retrieve providers data by specialty');
+            } else if (results.length === 0) {
+                return res.status(404).send('No providers found for this specialty');
+            } else {
+                // Render the providers view with the retrieved results
+                return res.render('providers', { results: results });
+            }
+        });
+    });
+
+    // Example
+    http://localhost:3000/providers/provider_specialty/Cardiology
 <br>
 
 
 ## NOTE: Do not fork this repository
+=
